@@ -1,0 +1,107 @@
+---
+title: "Configure xantham: modules, libraries, and inputs"
+sidebarTitle: "Configuration"
+description: "Name the generated F# API, pick TypeScript libraries and providers, and select which package inputs Xantham reads."
+---
+
+Xantham uses a JSON configuration file to control the generated module name, environment libraries, ambient type providers, and which package inputs are included in the binding. This page covers every available setting.
+
+## A minimal configuration
+
+```json
+{
+  "module": "MyApp.Bindings",
+  "lib": ["esnext", "dom"],
+  "types": []
+}
+```
+
+Pass the file with `--config ./xantham.json`. All properties are optional. The [repository schema](https://raw.githubusercontent.com/shayanhabibi/Xantham/master/xantham.schema.json) lists the available settings; use the schema from your Xantham version when pinning a build.
+
+## Name the F# API
+
+- **`module`** sets the generated F# module. The default is derived from the npm name: `@scope/pkg-name` becomes `Scope.PkgName`.
+- **`namespace`** names a related package family. Use the same namespace when generating packages that reference each other.
+- **`autoOpenExports`** marks generated `Exports` types as auto-open. It defaults to `false`; value exports then use explicit `Exports.member` access.
+- **`runtime`** overrides the JavaScript import path. The default is the package name, with the `@types/` naming convention undone.
+
+## Select the environment
+
+<CardGroup cols={2}>
+  <Card title="lib" icon="book">
+    Select TypeScript libraries, such as `esnext` and `dom`. Omitting this uses the compiler default, which includes DOM.
+  </Card>
+
+  <Card title="types" icon="puzzle-piece">
+    Select ambient providers. Omit for automatic discovery, use an empty array to disable it, or list installed providers such as `node`.
+  </Card>
+</CardGroup>
+
+For a worker environment that supplies its own globals, use the libraries its type package recommends. Loading DOM alongside a provider that redeclares the same globals can cause conflicts.
+
+Explicit imports and reference directives still resolve their dependencies when `types` is empty. A configured provider must be installed where the input package can resolve it.
+
+## Select public inputs
+
+Use `subpaths` to select concrete keys from the package's `exports` map:
+
+```json
+{
+  "subpaths": ["./client", "./server"]
+}
+```
+
+Use `publicInputs` to choose exact public keys and declaration files:
+
+```json
+{
+  "publicInputs": {
+    ".": "dist/index.d.ts",
+    "./client": "dist/client.d.ts"
+  }
+}
+```
+
+Only the listed public inputs are generated. Include `"."` to select the root. Keys must be exact public paths; expand wildcard exports into concrete keys.
+
+`publicInputs` is mutually exclusive with `entry` and `subpaths`. Each declaration path must name an existing TypeScript file inside the input package.
+
+Use separate configurations for browser and worker variants with different globals.
+
+## Configure package boundaries
+
+`groups` decides whether a dependency is generated, referenced, mapped to an existing F# type, or widened. See [Dependencies and shared types](/guide/dependencies) for examples.
+
+## Resolve NoInfer
+
+`resolveNoInfer: true` maps TypeScript's `NoInfer<T>` directly to `T`. The default preserves `NoInfer<T>` through the support library.
+
+## Generate your own standard library
+
+`compilerLib` controls the layout when generating a combined TypeScript library binding:
+
+```json
+{
+  "compilerLib": {
+    "module": "MyBindings.TypeScript",
+    "esModule": "Es",
+    "domModule": "Dom",
+    "autoOpenEs": false,
+    "autoOpenDom": false
+  }
+}
+```
+
+Defaults are `TypeScript.Lib`, `Es`, and `Dom`, with both auto-open flags off. The child module names must be distinct F# identifiers. ES and DOM are emitted together in one recursive module file.
+
+Most consumers can use [Xantham.Fable.Core.TS](/guide/support-packages#standard-libraries).
+
+<CardGroup cols={2}>
+  <Card title="Compose package bindings" icon="boxes-stacked" href="/guide/dependencies">
+    Ship dependencies or reuse types from another generated binding.
+  </Card>
+
+  <Card title="Understand the result" icon="circle-question" href="/guide/troubleshooting">
+    Findings, diagnostics, and common fixes.
+  </Card>
+</CardGroup>

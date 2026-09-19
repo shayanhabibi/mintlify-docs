@@ -1,0 +1,83 @@
+---
+title: "Xantham.Fable.Core and Xantham.Fable.Core.TS"
+sidebarTitle: "Support Packages"
+description: "Utility types and standard-library bindings shared by every generated package, plus notes on the in-progress Node bindings."
+---
+
+Shared utility types and standard-library bindings keep generated packages working with the same F# types.
+
+Use these alongside `Fable.Core` **5.2.0**, with Xantham package versions matching your generator release.
+
+## Utility types
+
+**Xantham.Fable.Core**
+
+```bash Terminal
+dotnet add package Xantham.Fable.Core
+```
+
+The support library represents TypeScript constructs such as property keys, indexed access, and nominal brands. Its utility types erase at runtime.
+
+### Property keys
+
+`keyof<'T>` carries a property name. `typekeyof<'T, 'Value>` also retains its value type.
+
+### Indexed values
+
+Property locks, keys, and record helpers represent access to TypeScript object properties.
+
+```fsharp
+open Fable.Core.JS
+
+type Config = { Timeout: int }
+
+let timeoutKey = typekeyof<Config, int> _.Timeout
+let timeout = TypeKeyOf.item timeoutKey { Timeout = 30 }
+```
+
+Open `Fable.Core.JS` for the erased types. Helper functions are available from the auto-opened `XanthamFableCore` module.
+
+See the [API reference](https://shayanhabibi.github.io/Xantham/reference/xantham-fable-core/) for the full surface.
+
+## Standard libraries
+
+**Xantham.Fable.Core.TS**
+
+```bash Terminal
+dotnet add package Xantham.Fable.Core.TS
+```
+
+Generated bindings for TypeScript's `esnext` and DOM libraries. Add this package to the consumer project alongside `Xantham.Fable.Core`.
+
+```fsharp
+open Fable.Core.TS
+
+type PendingRequest = {
+    Completion: Promise<string>
+    Target: Fable.Core.TS.Dom.EventTarget
+}
+```
+
+The `Es` module is auto-opened from `Fable.Core.TS`. DOM types stay under `Fable.Core.TS.Dom`.
+
+Custom [dependency mappings](/guide/dependencies) can use a separately generated standard library instead. Adding an assembly reference does not change the generator's configured group dispositions.
+
+See the [standard-library reference](https://shayanhabibi.github.io/Xantham/reference/xantham-fable-core-ts/).
+
+## Node bindings
+
+**Xantham.Fable.Node**
+
+Bindings for `@types/node` are under development. The package is currently marked as a stub in the repository; treat it as work in progress for this release.
+
+For a specific Node package, generate from its installed declarations and review the resulting findings and compile errors.
+
+## TypeScript.Wire is separate
+
+`Xantham.TypeScript.Wire` is a .NET compiler client for tools that inspect TypeScript. A Fable app using generated bindings does not need it.
+
+<CardGroup cols={2}>
+  <Card title="Build tools with TypeScript.Wire" icon="network-wired" href="/wire/introduction">
+    Read ASTs, query the type checker, and request diagnostics.
+  </Card>
+</CardGroup>

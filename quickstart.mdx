@@ -1,47 +1,122 @@
 ---
-title: "Quickstart"
-description: "Begin with a guide on the fastest path to a successful outcome"
+title: "Quickstart: your first Xantham binding"
+sidebarTitle: "Quickstart"
+description: "Turn an installed npm package's TypeScript declarations into F# bindings for your Fable app in four steps."
 ---
 
-Describe how someone begins using your product. What is the first thing they need to do? Are there any prerequisites?
-
-A quickstart should take someone from zero to using your product. They'll get a quick win and a sense of what they can accomplish.
+This quickstart takes an installed npm package's TypeScript declarations and produces F# bindings you can call from Fable. You install the `xantham` tool, cache its matching TypeScript compiler, generate a binding for `ansi-regex`, and inspect the output.
 
 ## Prerequisites
 
-Before you begin, you must have:
+<CardGroup cols={3}>
+  <Card title=".NET 10 SDK" icon="microsoft">
+    The Xantham CLI targets .NET 10.
+  </Card>
 
-- Requirement one (for example, Node.js 18+, a free account, an API key)
-- Requirement two (for example, a compatible device, a compatible browser, a compatible operating system)
+  <Card title="Node.js and npm" icon="node-js">
+    Both must be on `PATH`. Xantham uses npm to install its pinned TypeScript compiler.
+  </Card>
 
-## Get started
+  <Card title="Fable 5.x project" icon="folder">
+    Only needed when you consume the generated output.
+  </Card>
+</CardGroup>
 
-<Steps>
-  <Step title="Install">
-    Describe how to install your product or sign up.
+## 1. Install the tool
 
-    ```bash
-    npm install your-package
-    ```
-  </Step>
-  <Step title="Configure">
-    Describe any setup or configuration needed before first use.
+```bash Terminal
+dotnet tool install --global xantham
+xantham tsc init
+```
 
-    ```bash
-    your-cli init
-    ```
-  </Step>
-  <Step title="Run it">
-    Show the first thing a user does to see it working.
-
-    ```bash
-    your-cli start
-    ```
-  </Step>
-</Steps>
+`xantham tsc init` caches the TypeScript compiler pinned to your installed Xantham version. Run it again after every `dotnet tool update`.
 
 <Tip>
-  Give people a way to get help. This could be a link to a support page, a chat with a customer support agent, or a forum for your product.
-
-  Example: Need help? Reach out to us at [support@yourcompany.com](mailto:support@yourcompany.com).
+  If `xantham` is not on your `PATH`, add the .NET tools directory: `$HOME/.dotnet/tools` on macOS and Linux, or `%USERPROFILE%\.dotnet\tools` on Windows.
 </Tip>
+
+## 2. Install a package to bind
+
+Start with a small package that ships its own declarations:
+
+```bash Terminal
+mkdir my-bindings
+cd my-bindings
+npm init -y
+npm install --save-exact ansi-regex@6.3.0
+```
+
+Pin the npm version so later runs use the same declarations.
+
+## 3. Generate the binding
+
+```bash Terminal
+xantham generate ./node_modules/ansi-regex -o ./out
+```
+
+The command writes three artifacts into `./out`:
+
+<CardGroup cols={3}>
+  <Card title="AnsiRegex.fs" icon="file-code">
+    The F# types and imports to add to your Fable project.
+  </Card>
+
+  <Card title="manifest.json" icon="file-chart-column">
+    Aggregate counts for mapping quality across the generated surface.
+  </Card>
+
+  <Card title="symbols.jsonl" icon="list">
+    One JSON record per symbol with its findings.
+  </Card>
+</CardGroup>
+
+## 4. Use it in Fable
+
+Add the support packages to your consumer project:
+
+```bash Terminal
+dotnet add package Fable.Core --version 5.2.0
+dotnet add package Xantham.Fable.Core
+dotnet add package Xantham.Fable.Core.TS
+```
+
+Include the generated file before any code that uses it:
+
+```xml Project file
+<ItemGroup>
+  <Compile Include="out/AnsiRegex.fs" />
+  <Compile Include="Program.fs" />
+</ItemGroup>
+```
+
+Call an export:
+
+```fsharp Program.fs
+let pattern = AnsiRegex.Exports.ansiRegex()
+```
+
+Keep `ansi-regex` installed in your app's npm project. Fable emits an import from that package; the binding does not include its JavaScript implementation.
+
+<Note>
+  Bindings target **Fable 5.x**. Review the report for APIs you intend to use: some TypeScript types widen to a broader F# representation.
+</Note>
+
+## Next steps
+
+<CardGroup cols={2}>
+  <Card title="Generate any package" icon="wand-magic-sparkles" href="/guide/generate-bindings">
+    Learn the options for choosing declarations, output paths, and terminal output.
+  </Card>
+
+  <Card title="Use the generated F#" icon="code" href="/guide/using-bindings">
+    Package references, file order, and calling generated members.
+  </Card>
+
+  <Card title="Configure the mapping" icon="gear" href="/guide/configuration">
+    Rename modules, select public inputs, and control library resolution.
+  </Card>
+
+  <Card title="Read the report" icon="magnifying-glass" href="/guide/troubleshooting">
+    Understand findings and fix the most common problems.
+  </Card>
+</CardGroup>

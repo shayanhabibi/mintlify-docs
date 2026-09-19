@@ -1,0 +1,67 @@
+---
+title: "Install the Xantham CLI and TypeScript compiler"
+sidebarTitle: "Installation"
+description: "Install the .NET tool, cache the pinned TypeScript compiler, and check that your environment is ready to generate bindings."
+---
+
+Set up the command-line tool once, then generate bindings from your installed npm packages.
+
+<CardGroup cols={2}>
+  <Card title=".NET 10 SDK" icon="microsoft">
+    The Xantham CLI targets .NET 10.
+  </Card>
+
+  <Card title="Node.js and npm" icon="node">
+    Keep both on PATH. Xantham uses npm to install its matching TypeScript compiler.
+  </Card>
+</CardGroup>
+
+## Install Xantham
+
+```bash Terminal
+dotnet tool install --global xantham
+xantham --version
+```
+
+For a prerelease build, add `--prerelease` to the install command.
+
+## Set up TypeScript
+
+```bash Terminal
+xantham tsc init
+xantham tsc version
+```
+
+`tsc init` caches the compiler version expected by your installed Xantham tool. `tsc version` shows the expected version and whether it is available.
+
+<Note>
+  Xantham uses TypeScript 7's native compiler API. Run `xantham tsc init` after updating the tool to install its matching compiler.
+</Note>
+
+## Update the tool
+
+```bash Terminal
+dotnet tool update --global xantham
+xantham tsc init
+```
+
+## Check the setup
+
+```bash Terminal
+dotnet --version
+node --version
+npm --version
+xantham --help
+```
+
+If `xantham` is unavailable after installation, add the .NET tools directory to PATH: `$HOME/.dotnet/tools` on macOS/Linux or `%USERPROFILE%\.dotnet\tools` on Windows. Open a new terminal after changing PATH.
+
+<CardGroup cols={2}>
+  <Card title="Generate your first binding" icon="bolt" href="/quickstart">
+    A small package, from install to F# output.
+  </Card>
+
+  <Card title="Something failed?" icon="triangle-exclamation" href="/guide/troubleshooting">
+    Compiler setup, missing declarations, and generation reports.
+  </Card>
+</CardGroup>

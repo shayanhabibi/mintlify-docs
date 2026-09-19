@@ -1,37 +1,63 @@
 {
   "$schema": "https://mintlify.com/docs.json",
-  "theme": "mint",
-  "name": "Mintlify Starter Kit",
+  "theme": "palm",
+  "name": "Xantham",
   "colors": {
-    "primary": "#16A34A",
-    "light": "#07C983",
-    "dark": "#15803D"
+    "primary": "#18E299",
+    "light": "#18E299",
+    "dark": "#0D9F6C"
   },
   "favicon": "/favicon.svg",
   "navigation": {
-    "pages": [
+    "tabs": [
       {
-        "group": "Getting Started",
-        "pages": [
-          "index",
-          "quickstart"
+        "tab": "Guide",
+        "groups": [
+          {
+            "group": "Get Started",
+            "pages": [
+              "index",
+              "quickstart",
+              "guide/installation"
+            ]
+          },
+          {
+            "group": "Generator",
+            "pages": [
+              "guide/generate-bindings",
+              "guide/using-bindings",
+              "guide/support-packages",
+              "guide/configuration",
+              "guide/dependencies",
+              "guide/troubleshooting"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "TypeScript.Wire",
+        "groups": [
+          {
+            "group": "Compiler Client",
+            "pages": [
+              "wire/introduction",
+              "wire/navigation"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Contributing",
+        "groups": [
+          {
+            "group": "Contributor Guide",
+            "pages": [
+              "dev/introduction"
+            ]
+          }
         ]
       }
-    ],
-    "global": {
-      "anchors": [
-        {
-          "anchor": "Documentation",
-          "href": "https://mintlify.com/docs",
-          "icon": "book-open-cover"
-        },
-        {
-          "anchor": "Blog",
-          "href": "https://mintlify.com/blog",
-          "icon": "newspaper"
-        }
-      ]
-    }
+    ]
   },
   "logo": {
     "light": "/logo/light.svg",
@@ -40,33 +66,19 @@
   "navbar": {
     "links": [
       {
-        "label": "Support",
-        "href": "mailto:hi@mintlify.com"
+        "href": "https://github.com/shayanhabibi/Xantham",
+        "label": "GitHub"
       }
     ],
     "primary": {
       "type": "button",
-      "label": "Dashboard",
-      "href": "https://app.mintlify.com"
+      "label": "Get Started",
+      "href": "/quickstart"
     }
-  },
-  "contextual": {
-    "options": [
-      "copy",
-      "view",
-      "chatgpt",
-      "claude",
-      "perplexity",
-      "mcp",
-      "cursor",
-      "vscode"
-    ]
   },
   "footer": {
     "socials": {
-      "x": "https://x.com/mintlify",
-      "github": "https://github.com/mintlify",
-      "linkedin": "https://linkedin.com/company/mintlify"
+      "github": "https://github.com/shayanhabibi/Xantham"
     }
   }
 }

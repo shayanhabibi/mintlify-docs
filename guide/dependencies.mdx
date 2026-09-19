@@ -1,0 +1,116 @@
+---
+title: "Dependencies, shared types, and declaration catalogs"
+sidebarTitle: "Dependencies"
+description: "Ship, reference, map, or widen types from other packages, and share declaration identities across bindings with catalogs."
+---
+
+Xantham lets you control what happens when a declaration refers to a type from another package. You can ship dependency declarations alongside your binding, reference an external binding, map types to existing F# types, or widen them to `obj`.
+
+## Set group dispositions
+
+`groups` is keyed by npm package name. Use `typescript/lib` for TypeScript's standard libraries.
+
+<CardGroup cols={2}>
+  <Card title="ship" icon="ship" href="#ship">
+    Emit the dependency's declarations under `groups/`. Compile them before the binding that uses them.
+  </Card>
+
+  <Card title="reference" icon="link" href="#reference">
+    Use the group's F# module name. Supply a separately generated binding with matching names.
+  </Card>
+
+  <Card title="map" icon="arrow-right-arrow-left" href="#map">
+    Map named TypeScript types to existing F# types. Names missing from the map widen.
+  </Card>
+
+  <Card title="widen" icon="expand" href="#widen">
+    Render the reference as `obj` and report a finding. This is the default for unlisted groups.
+  </Card>
+</CardGroup>
+
+### ship
+
+Emit the dependency's declarations under `groups/`. Compile them before the binding that uses them.
+
+### reference
+
+Use the group's F# module name. Supply a separately generated binding with matching names.
+
+### map
+
+Map named TypeScript types to existing F# types. Names missing from the map widen.
+
+### widen
+
+Render the reference as `obj` and report a finding. This is the default for unlisted groups.
+
+```json xantham.json
+{
+  "namespace": "MyBindings",
+  "groups": {
+    "shared-models": "ship",
+    "another-package": "reference"
+  }
+}
+```
+
+Configure the same namespace for related generation runs.
+
+## Map an existing type
+
+A string destination takes no type arguments. Use the object form to state the destination's generic arity:
+
+```json xantham.json
+{
+  "groups": {
+    "typescript/lib": {
+      "map": {
+        "RegExp": "System.Text.RegularExpressions.Regex",
+        "WeakRef": { "name": "System.WeakReference", "arity": 1 }
+      }
+    }
+  }
+}
+```
+
+Choose mappings whose Fable behavior matches the JavaScript type. A mismatched arity widens and reports finding `TR053`.
+
+## Share declaration identities
+
+When several bindings must reuse the same types, emit a declaration catalog from the producer:
+
+**Producer configuration**
+
+```json
+{
+  "module": "Example",
+  "declarationCatalog": true
+}
+```
+
+The run writes `declarations.json` beside its F# output. Reference it from a later run:
+
+**Consumer configuration**
+
+```json
+{
+  "module": "Example.Adapter",
+  "entry": "adapter.d.ts",
+  "runtime": "example/adapter",
+  "declarationReferences": ["/bindings/root/declarations.json"]
+}
+```
+
+Catalog paths are absolute or relative to the input package directory. Replace the example path with the producer's output path.
+
+The consumer reuses the producer's F# identities while retaining its own imports. Compile producers first, following the catalog's ordered `owners` list.
+
+## Keep catalogs compatible
+
+Generate related bindings with the same Xantham build and compatible `lib`, `types`, group dispositions, and inference options. Keep separate catalogs for environments that need different globals.
+
+Catalogs check declaration identity, package/source hashes, and F# API compatibility. If a catalog is rejected, regenerate the related bindings together and inspect the diagnostic. Some entry-dependent or generic shapes still cannot share an emitted identity; those combinations require separate bindings or a mapping change.
+
+<Warning>
+  A reference needs an implementation. Both `reference` groups and declaration catalogs require the producer's generated F# or compiled assembly in the consumer project.
+</Warning>
